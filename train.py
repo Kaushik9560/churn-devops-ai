@@ -9,11 +9,45 @@ import mlflow.xgboost
 import joblib
 import os
 
+
+def find_target_column(columns):
+    normalized_to_original = {col.strip().lower(): col for col in columns}
+    candidate_names = (
+        "churn",
+        "target",
+        "label",
+        "exited",
+        "attrition",
+        "left",
+        "y",
+    )
+
+    for name in candidate_names:
+        if name in normalized_to_original:
+            return normalized_to_original[name]
+
+    for col in columns:
+        lowered = col.strip().lower()
+        if any(name in lowered for name in candidate_names):
+            return col
+
+    raise ValueError(
+        "Could not find a target column in the dataset. "
+        f"Available columns: {list(columns)}"
+    )
+
+
 # ── 1. Load data ──────────────────────────────────────────────
 df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 
 # ── 2. Normalize column names (handle any CSV mirror) ─────────
 df.columns = df.columns.str.strip()
+
+if len(df.columns) < 2:
+    raise ValueError(
+        "Dataset appears invalid or incomplete after loading. "
+        f"Parsed columns: {list(df.columns)}"
+    )
 
 # Drop ID column if present (any variant)
 id_cols = [c for c in df.columns if "customerid" in c.lower() or "id" == c.lower()]
@@ -29,7 +63,7 @@ elif "totalcharges" in [c.lower() for c in df.columns]:
 df.dropna(inplace=True)
 
 # Find target column (Churn)
-churn_col = [c for c in df.columns if "churn" in c.lower()][0]
+churn_col = find_target_column(df.columns)
 
 # ── 3. Encode all object columns ──────────────────────────────
 le = LabelEncoder()
