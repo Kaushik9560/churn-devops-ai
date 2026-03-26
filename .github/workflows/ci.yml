@@ -12,36 +12,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4        # ← v4 fixes Node.js warning
 
-      # 2. Set up Python
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5   # ← v5 fixes Node.js warning
         with:
           python-version: "3.10"
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest httpx
 
-      # 4. Train model (generates api/model.pkl)
+      - name: Download dataset
+        run: |
+          pip install kaggle
+          mkdir -p data
+          # Download via direct URL (no Kaggle login needed)
+          curl -L "https://raw.githubusercontent.com/dsrscientist/dataset1/master/Telco-Customer-Churn.csv" \
+            -o data/WA_Fn-UseC_-Telco-Customer-Churn.csv
+
       - name: Train model
         run: python train.py
 
-      # 5. Run tests
       - name: Run tests
         run: pytest tests/ -v
 
-      # 6. Build Docker image
       - name: Build Docker image
         run: docker build -t churn-api .
 
-      # 7. Confirm container starts
       - name: Smoke test container
         run: |
           docker run -d -p 8000:8000 --name churn-test churn-api
