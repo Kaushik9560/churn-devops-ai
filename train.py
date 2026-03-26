@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
 from xgboost import XGBClassifier
+from pathlib import Path
 import mlflow
 import mlflow.xgboost
 import joblib
@@ -37,8 +38,13 @@ def find_target_column(columns):
     )
 
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+DATASET_PATH = PROJECT_ROOT / "data" / "WA_Fn-UseC_-Telco-Customer-Churn.csv"
+MLFLOW_TRACKING_DIR = PROJECT_ROOT / "mlruns_local"
+
+
 # ── 1. Load data ──────────────────────────────────────────────
-df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
+df = pd.read_csv(DATASET_PATH)
 
 # ── 2. Normalize column names (handle any CSV mirror) ─────────
 df.columns = df.columns.str.strip()
@@ -78,6 +84,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # ── 4. Train with MLflow tracking ─────────────────────────────
+MLFLOW_TRACKING_DIR.mkdir(parents=True, exist_ok=True)
+mlflow.set_tracking_uri(MLFLOW_TRACKING_DIR.as_uri())
 mlflow.set_experiment("churn-prediction")
 
 with mlflow.start_run():
@@ -104,14 +112,10 @@ with mlflow.start_run():
     mlflow.log_metric("roc_auc",  auc)
     mlflow.log_metric("f1_score", f1)
 
-    mlflow.xgboost.log_model(
-        model,
-        artifact_path="model",
-        registered_model_name="churn-model",
-    )
+    mlflow.xgboost.log_model(model, name="model")
 
-    os.makedirs("api", exist_ok=True)
-    joblib.dump(model, "api/model.pkl")
+    os.makedirs(PROJECT_ROOT / "api", exist_ok=True)
+    joblib.dump(model, PROJECT_ROOT / "api" / "model.pkl")
 
     print(f"✅  Accuracy : {acc:.4f}")
     print(f"✅  ROC-AUC  : {auc:.4f}")
