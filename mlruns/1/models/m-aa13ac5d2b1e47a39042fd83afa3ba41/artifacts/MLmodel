@@ -1,0 +1,22 @@
+artifact_path: /home/kaushik-sharma/HandS/churn-devops-ai/mlruns/1/models/m-aa13ac5d2b1e47a39042fd83afa3ba41/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.3
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: ubj
+    xgb_version: 3.2.0
+mlflow_version: 3.10.1
+model_id: m-aa13ac5d2b1e47a39042fd83afa3ba41
+model_size_bytes: 162763
+model_uuid: m-aa13ac5d2b1e47a39042fd83afa3ba41
+prompts: null
+run_id: 0b383be934164d558b2a69fc4ee767b1
+utc_time_created: '2026-03-26 06:35:00.240945'
