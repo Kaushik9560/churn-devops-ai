@@ -13,7 +13,8 @@ import os
 df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 
 # ── 2. Preprocess ─────────────────────────────────────────────
-df.drop(columns=["customerID"], inplace=True)
+# Drop customerID if it exists (column name varies by dataset source)
+df.drop(columns=[c for c in df.columns if "customer" in c.lower()], inplace=True)
 df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
 df.dropna(inplace=True)
 
