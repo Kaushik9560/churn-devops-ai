@@ -26,13 +26,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest httpx
 
-      - name: Download dataset
+      - name: Validate dataset
         run: |
-          pip install kaggle
-          mkdir -p data
-          # Download via direct URL (no Kaggle login needed)
-          curl -L "https://raw.githubusercontent.com/dsrscientist/dataset1/master/Telco-Customer-Churn.csv" \
-            -o data/WA_Fn-UseC_-Telco-Customer-Churn.csv
+          test -f data/WA_Fn-UseC_-Telco-Customer-Churn.csv
+          head -n 1 data/WA_Fn-UseC_-Telco-Customer-Churn.csv
 
       - name: Train model
         run: python train.py
